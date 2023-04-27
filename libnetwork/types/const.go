@@ -41,6 +41,7 @@ const (
 	ModeOption    = "mode"
 	IsolateOption = "isolate"
 	MetricOption  = "metric"
+	NoAutoGateway = "no_auto_gateway"
 )
 
 type NetworkBackend string

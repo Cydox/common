@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/containers/common/libnetwork/internal/util"
+	internalutil "github.com/containers/common/libnetwork/internal/util"
 	"github.com/containers/common/libnetwork/types"
 	"github.com/containers/common/pkg/config"
 	"github.com/containers/storage/pkg/lockfile"
@@ -267,8 +268,14 @@ func parseNetwork(network *types.Network) error {
 		return fmt.Errorf("invalid network ID %q", network.ID)
 	}
 
-	// add gateway when not internal or dns enabled
-	addGateway := !network.Internal || network.DNSEnabled
+	// parse noAutoGateway
+	noAutoGateway, err := internalutil.ParseNoAutoGateway(network.Options[types.NoAutoGateway])
+	if err != nil {
+		return err
+	}
+
+	// add gateway when not internal or dns enabled and no-auto-gateway not set
+	addGateway := (!network.Internal || network.DNSEnabled) && (!noAutoGateway)
 	return util.ValidateSubnets(network, addGateway, nil)
 }
 

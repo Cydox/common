@@ -34,3 +34,16 @@ func ParseVlan(vlan string) (int, error) {
 	}
 	return v, nil
 }
+
+// ParseNoAutoGateway parses the no_auto_gateway option
+func ParseNoAutoGateway(opt string) (bool, error) {
+	switch opt {
+	case "":
+		return false, nil // Default
+	case "1":
+		return true, nil
+	case "0":
+		return false, nil
+	}
+	return false, fmt.Errorf("no_auto_gateway must be 0 or 1, got: %s", opt)
+}
