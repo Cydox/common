@@ -198,6 +198,11 @@ func (n *netavarkNetwork) networkCreate(newNetwork *types.Network, defaultNet bo
 				if err != nil {
 					return nil, err
 				}
+			case types.NoAutoGateway:
+				_, err := internalutil.ParseNoAutoGateway(value)
+				if err != nil {
+					return nil, err
+				}
 
 			default:
 				return nil, fmt.Errorf("unsupported bridge network option %s", key)
@@ -230,8 +235,14 @@ func (n *netavarkNetwork) networkCreate(newNetwork *types.Network, defaultNet bo
 		}
 	}
 
-	// add gateway when not internal or dns enabled
-	addGateway := !newNetwork.Internal || newNetwork.DNSEnabled
+	// parse noAutoGateway
+	noAutoGateway, err := internalutil.ParseNoAutoGateway(newNetwork.Options[types.NoAutoGateway])
+	if err != nil {
+		return nil, err
+	}
+
+	// add gateway when not internal or dns enabled and no_auto_gateway not set
+	addGateway := (!newNetwork.Internal || newNetwork.DNSEnabled) && (!noAutoGateway)
 	err = internalutil.ValidateSubnets(newNetwork, addGateway, usedNetworks)
 	if err != nil {
 		return nil, err
@@ -314,6 +325,11 @@ func createIpvlanOrMacvlan(network *types.Network) error {
 			}
 		case types.MTUOption:
 			_, err := internalutil.ParseMTU(value)
+			if err != nil {
+				return err
+			}
+		case types.NoAutoGateway:
+			_, err := internalutil.ParseNoAutoGateway(value)
 			if err != nil {
 				return err
 			}
